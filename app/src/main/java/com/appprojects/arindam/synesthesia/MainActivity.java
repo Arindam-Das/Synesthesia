@@ -2,6 +2,7 @@ package com.appprojects.arindam.synesthesia;
 
 import android.content.Intent;
 import android.media.MediaMetadataRetriever;
+import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
@@ -70,14 +71,9 @@ public class MainActivity extends AppCompatActivity {
         tabLayout.setupWithViewPager(mViewPager);
 
         FloatingActionButton fab =  findViewById(R.id.fab_song_classifier);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                //TODO : play last added songs
-                Intent intent = new Intent(getApplicationContext(), ArtistActivity.class);
-                intent.putExtra("@artist_activity", "*,Ed Sheeran,*,*,*");
-                startActivity(intent);
-            }
+        fab.setOnClickListener(view -> {
+            //TODO : play last added songs
+            Snackbar.make(view, "Play last added songs.", Snackbar.LENGTH_SHORT).show();
         });
 
     }
@@ -126,6 +122,7 @@ public class MainActivity extends AppCompatActivity {
                 pages[i].setMetaDataKey(new int[]{
                         MediaMetadataRetriever.METADATA_KEY_ARTIST,
                         MediaMetadataRetriever.METADATA_KEY_ALBUM,
+                        MediaMetadataRetriever.METADATA_KEY_GENRE,
                         MediaMetadataRetriever.METADATA_KEY_TITLE
                 }[i]); pages[i].setQuery(null);
                 pages[i].setViewType(SongAdapter.ViewType.GRID);
@@ -137,12 +134,11 @@ public class MainActivity extends AppCompatActivity {
         }
 
         public SectionsPagerAdapter(FragmentManager fm) {
-            super(fm); //initialize();
+            super(fm); initialize();
         }
 
         @Override
         public Fragment getItem(int position) {
-            initialize();
             // getItem is called to instantiate the fragment for the given page.
             // Return a PlaceholderFragment (defined as a static inner class below).
             if(position < 0 || position > getCount())
@@ -153,15 +149,15 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public int getCount() {
-            // Show 3 total pages.
-            return 3;
+            // Show 4 total pages.
+            return 4;
         }
 
         @Override
         public CharSequence getPageTitle(int position) {
             if(position < 0 || position > getCount())
                 return null;
-            return new String[]{"Artists", "Albums", "Songs"}[position];
+            return new String[]{"Artists", "Albums", "Genre", "Songs"}[position];
         }
 
 
@@ -194,10 +190,16 @@ public class MainActivity extends AppCompatActivity {
                                 "*,"+currentSongAdapter.getSongList().get(position).getArtist()+",*,*");
                         break;
                     case MediaMetadataRetriever.METADATA_KEY_ALBUM:
-                        intent = new Intent(this, AlbumActivity.class);
+                        intent = new Intent(this, ListingActivity.class);
                         intent.putExtra("@album_activity",
                                 currentSongAdapter.getSongList().get(position).getAlbum()+",*,*,*");
                         break;
+                    case MediaMetadataRetriever.METADATA_KEY_GENRE:
+                        intent = new Intent(this, ListingActivity.class);
+                        intent.putExtra("@album_activity",
+                                "*,*,"+currentSongAdapter.getSongList().get(position).getGenre()+",*");
+                        break;
+
                 } if(intent != null) startActivity(intent);
                 return true;
 

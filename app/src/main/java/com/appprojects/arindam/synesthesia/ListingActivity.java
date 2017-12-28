@@ -33,7 +33,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class AlbumActivity extends AppCompatActivity {
+public class ListingActivity extends AppCompatActivity {
 
     //Fragment to host the RecyclerView for the album activity
     private SongFragment songFragment;
@@ -47,7 +47,8 @@ public class AlbumActivity extends AppCompatActivity {
         if(query == null){
             query = getIntent()
                     .getStringExtra("@album_activity");
-            title = query.substring(0, query.indexOf(","));
+            String[] arr = query.split(",");
+            title = arr[0].equals("*")?arr[2]:arr[0];
         } return query;
     }
 
@@ -75,12 +76,7 @@ public class AlbumActivity extends AppCompatActivity {
         }
 
         FloatingActionButton floatingActionButton = findViewById(R.id.fab_album);
-        floatingActionButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Play all songs in the album", Snackbar.LENGTH_SHORT).show();
-            }
-        });
+        floatingActionButton.setOnClickListener(view -> Snackbar.make(view, "Play all songs in the list.", Snackbar.LENGTH_SHORT).show());
 
         Toolbar toolbar = findViewById(R.id.toolbar_album);
         toolbar.setTitle(this.title);

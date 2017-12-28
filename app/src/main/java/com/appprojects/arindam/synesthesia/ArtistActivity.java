@@ -2,6 +2,7 @@ package com.appprojects.arindam.synesthesia;
 
 import android.content.Intent;
 import android.media.MediaMetadataRetriever;
+import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.ActionBar;
@@ -13,11 +14,10 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
-import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 
-import android.widget.TextView;
+import android.widget.Toast;
 
 import com.appprojects.arindam.synesthesia.util.recyclerui.SongAdapter;
 import com.appprojects.arindam.synesthesia.util.recyclerui.SongFragment;
@@ -83,51 +83,11 @@ public class ArtistActivity extends AppCompatActivity {
         tabLayout.setupWithViewPager(mViewPager);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab_artist);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(getApplicationContext(), AlbumActivity.class);
-                intent.putExtra("@album_activity", "Divide (Deluxe Edition),*,*,*");
-                startActivity(intent);
-            }
+        fab.setOnClickListener(view -> {
+            //TODO: play all songs from this artist
+            Snackbar.make(view, "Play all songs from this artist.", Snackbar.LENGTH_SHORT).show();
         });
 
-    }
-
-
-    /**
-     * A placeholder fragment containing a simple view.
-     */
-    public static class PlaceholderFragment extends Fragment {
-        /**
-         * The fragment argument representing the section number for this
-         * fragment.
-         */
-        private static final String ARG_SECTION_NUMBER = "section_number";
-
-        public PlaceholderFragment() {
-        }
-
-        /**
-         * Returns a new instance of this fragment for the given section
-         * number.
-         */
-        public static PlaceholderFragment newInstance(int sectionNumber) {
-            PlaceholderFragment fragment = new PlaceholderFragment();
-            Bundle args = new Bundle();
-            args.putInt(ARG_SECTION_NUMBER, sectionNumber);
-            fragment.setArguments(args);
-            return fragment;
-        }
-
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                                 Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_artist, container, false);
-            TextView textView = (TextView) rootView.findViewById(R.id.section_label);
-            textView.setText(getString(R.string.section_format, getArguments().getInt(ARG_SECTION_NUMBER)));
-            return rootView;
-        }
     }
 
     /**
@@ -136,7 +96,7 @@ public class ArtistActivity extends AppCompatActivity {
      */
     public class SectionsPagerAdapter extends FragmentPagerAdapter {
 
-        private SongFragment albums, songs;
+        private SongFragment albums, songs, current;
 
         private void initialize(){
             if(albums == null){
@@ -144,21 +104,25 @@ public class ArtistActivity extends AppCompatActivity {
                 albums.setViewType(SongAdapter.ViewType.GRID);
                 albums.setQuery(getQuery());
                 albums.beRacist();
+                albums.setOnClickListener(view -> current = albums);
                 albums.setMetaDataKey(MediaMetadataRetriever.METADATA_KEY_ALBUM);
             }
             if(songs == null){
                 songs = new SongFragment();
                 songs.setQuery(getQuery());
+                songs.setOnClickListener(view -> current = songs);
             }
         }
 
         public SectionsPagerAdapter(FragmentManager fm) {
-            super(fm);
+            super(fm); initialize();
         }
+
+        public SongFragment getCurrentPage() { return current; }
 
         @Override
         public Fragment getItem(int position) {
-            initialize();
+            //initialize();
             switch (position){
                 case 0: return albums;
                 case 1: return songs;
@@ -181,6 +145,42 @@ public class ArtistActivity extends AppCompatActivity {
                     return "Songs";
             }
             return null;
+        }
+
+
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        SongAdapter currentSongAdapter = this.mSectionsPagerAdapter
+                .getCurrentPage().getSongAdapter();
+        int position = currentSongAdapter.getPosition();
+
+        Toast.makeText(this, ""+position, Toast.LENGTH_SHORT).show();
+
+        switch (item.getItemId()) {
+            case R.id.add_to_playlist:
+            case R.id.add_to_queue:
+            case R.id.set_as_ringtone:
+            case R.id.c_add_to_playlist:
+            case R.id.c_add_to_queue:
+                Toast.makeText(this, item.getTitle()+" applied to "+
+                        currentSongAdapter.getSongList().get(position).getTitle(), Toast.LENGTH_SHORT).show();
+                return true;
+            case R.id.c_go_to_cluster:
+                Intent intent = null;
+                switch (this.mSectionsPagerAdapter.current.getMetaDataKey()){
+                    case MediaMetadataRetriever.METADATA_KEY_ALBUM:
+                        intent = new Intent(this, ListingActivity.class);
+                        intent.putExtra("@album_activity",
+                                currentSongAdapter.getSongList().get(position).getAlbum()+"," +
+                                        currentSongAdapter.getSongList().get(position).getArtist()+",*,*");
+                        break;
+                } if(intent != null) startActivity(intent);
+                return true;
+
+            default:
+                return false;
         }
     }
 }

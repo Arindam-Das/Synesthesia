@@ -16,6 +16,8 @@ import android.view.LayoutInflater;
 import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.GridLayout;
+import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -129,17 +131,6 @@ public class SongFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        switch (getViewType()) {
-            case GRID:
-                this.layoutManager = new GridLayoutManager(getContext(),
-                        2,
-                        GridLayoutManager.VERTICAL,
-                        false); break;
-
-            case LIST:
-                this.layoutManager = new LinearLayoutManager(getContext());
-        }
-
         filterSongs();
 
         if(isRacist) { discriminate(); }
@@ -211,10 +202,18 @@ public class SongFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.frag_recycler, container, false);
 
         recyclerView = rootView.findViewById(R.id.recycler_view);
-        if(!hasLayoutManager)
-            recyclerView.setLayoutManager(this.layoutManager);
+        switch (getViewType()) {
+            case GRID:
+                this.layoutManager = new GridLayoutManager(getContext(),
+                        2,
+                        GridLayoutManager.VERTICAL,
+                        false); break;
 
-        hasLayoutManager = true;
+            case LIST:
+                this.layoutManager = new LinearLayoutManager(getContext());
+        }
+        recyclerView.setLayoutManager(layoutManager);
+
         songAdapter = new SongAdapter(this.getSongList(),
                 this.getViewType(), getMetaDataKey());
         songAdapter.setOnClickListener(this.onClickListener);
