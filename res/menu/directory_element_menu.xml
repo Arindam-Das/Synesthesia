@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/remove_from_list"
+        android:title="Remove from this list"
+        />
+
+    <item
+        android:id="@+id/play_all_in_this_dir"
+        android:title="Play all"
+        />
+
+</menu>

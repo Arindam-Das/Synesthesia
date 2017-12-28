@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_marginLeft="@dimen/activity_horizontal_margin"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+
+    android:padding="10dp">
+
+
+
+    <ImageView
+        android:id="@+id/folder_thumbnail"
+        android:src="@mipmap/ic_launcher_folder"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+
+    <TextView
+        android:textColor="@color/colorPrimaryDark"
+        android:id="@+id/directoryName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/directory_name"
+        android:textSize="20sp"
+        android:layout_marginLeft="22dp"
+        android:layout_marginStart="22dp"
+        android:layout_alignParentTop="true"
+        android:layout_toRightOf="@+id/folder_thumbnail"
+        android:layout_toEndOf="@+id/folder_thumbnail" />
+
+    <TextView
+        android:textColor="@color/colorPrimary"
+        android:id="@+id/path_text"
+        android:text="usr/music/directory"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingLeft="40dp"
+        android:layout_below="@+id/directoryName"
+        android:layout_toEndOf="@id/folder_thumbnail"
+        android:layout_toRightOf="@id/folder_thumbnail" />
+
+
+
+
+</RelativeLayout>
