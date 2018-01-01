@@ -3,7 +3,6 @@ package com.appprojects.arindam.synesthesia.util.recyclerui;
 import android.media.MediaMetadataRetriever;
 import android.support.design.widget.Snackbar;
 import android.support.v7.widget.RecyclerView;
-import android.util.SparseBooleanArray;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
@@ -12,16 +11,14 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
-
 import com.appprojects.arindam.synesthesia.R;
 import com.appprojects.arindam.synesthesia.util.Song;
+import com.appprojects.arindam.synesthesia.util.Task;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
-
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+
 
 /**
  * Custom {@link RecyclerView.Adapter} for our use.
@@ -31,16 +28,11 @@ import java.util.Map;
  */
 
 public class SongAdapter extends RecyclerView.Adapter<SongAdapter.ViewHolder> {
+
     /*Instance variables of class SongAdapter*/
     private List<Song> songList; // data source for list of songs
     private final ViewType viewType;
     private int metadataKey;
-
-    private View.OnClickListener onClickListener;
-
-    public void setOnClickListener(View.OnClickListener onClickListener) {
-        this.onClickListener = onClickListener;
-    }
 
     /**
      * Enum to specify the type of view to be used.
@@ -75,18 +67,15 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.ViewHolder> {
     /**
      * ViewHolder class for our RecyclerView.Adapter
      */
-    static class ViewHolder extends RecyclerView.ViewHolder implements View.OnCreateContextMenuListener{
+    static class ViewHolder extends RecyclerView.ViewHolder
+            implements View.OnCreateContextMenuListener {
+
         /* Instance variables of class ViewHolder. We store reference to
         *  the various widgets to be contained in the View to be held
         *  by this view holder. */
         final TextView title, metadata;
         final ImageView albumArt;
         final int menuResId;
-
-        //monitor fo loading images
-        private boolean imageLoaded = false;
-        public boolean isImageLoaded() { return imageLoaded; }
-        public void setImageLoaded(boolean status){ imageLoaded = status; }
 
         /**
          * Constructs a new instance of {@link ViewHolder}
@@ -123,7 +112,6 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.ViewHolder> {
 
     }
 
-    private SparseBooleanArray imageLoadedAtposition;
 
     /**
      * Constructs a new instance of SongAdapter.
@@ -135,7 +123,6 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.ViewHolder> {
     public SongAdapter(List<Song> songs, ViewType type, int metadataKey){
         this.songList = songs; this.viewType = type;
         this.metadataKey = metadataKey;
-        imageLoadedAtposition = new SparseBooleanArray();
     }
 
     /**
@@ -194,11 +181,11 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.ViewHolder> {
                 break;
             case GRID:
                 holder.title.setText(song.getMetadata(metadataKey));
-                //if(imageLoadedAtposition.get(position, false)) break;
+
                 MediaMetadataRetriever metadataRetriever = new MediaMetadataRetriever();
                 metadataRetriever.setDataSource(song.getPath());
                 byte[] image = metadataRetriever.getEmbeddedPicture();
-                //imageLoadedAtposition.put(position, true);
+
                 if(image == null || holder.albumArt == null) break;
                 holder.albumArt.setScaleType(ImageView.ScaleType.CENTER_CROP);
                 Glide.with(holder.itemView)
@@ -211,32 +198,14 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.ViewHolder> {
                 break;
         }
 
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
-            /**
-             * @param view view that was clicked
-             */
-            @Override
-            public void onClick(View view) {
-                setPosition(holder.getAdapterPosition());
-                Snackbar.make(view, getSongList().get(getPosition()).getTitle()+
-                        " was selected.", Snackbar.LENGTH_SHORT).show();
-                onClickListener.onClick(view);
-            }
-        });
+        holder.itemView.setOnClickListener(view -> {
+            setPosition(holder.getAdapterPosition());
+            Snackbar.make(view, getSongList().get(getPosition()).getTitle()+
+                    " was selected.", Snackbar.LENGTH_SHORT).show(); });
 
-        holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
-            /**
-             * @param view the view that was clicked and held
-             * @return false if the event was handled here and no other
-             * listeners are necessary, true otherwise
-             */
-            @Override
-            public boolean onLongClick(View view) {
-                onClickListener.onClick(view);
-                setPosition(holder.getAdapterPosition());
-                return false;
-            }
-        });
+        holder.itemView.setOnLongClickListener(view -> {
+            setPosition(holder.getAdapterPosition());
+            return false; });
     }
 
 
@@ -267,6 +236,5 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.ViewHolder> {
     }
 
     public List<Song> getSongList() { return songList; }
-
 
 }

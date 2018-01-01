@@ -2,9 +2,11 @@ package com.appprojects.arindam.synesthesia;
 
 import android.content.Intent;
 import android.media.MediaMetadataRetriever;
+import android.os.PersistableBundle;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 
@@ -13,14 +15,12 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
-import android.util.DisplayMetrics;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import com.appprojects.arindam.synesthesia.util.recyclerui.SongAdapter;
 import com.appprojects.arindam.synesthesia.util.recyclerui.SongFragment;
 
 public class MainActivity extends AppCompatActivity {
@@ -42,15 +42,9 @@ public class MainActivity extends AppCompatActivity {
 
     private ProgressBar mProgressBar;
 
-    private float convertDPToPixels(int dp) {
-        DisplayMetrics metrics = new DisplayMetrics();
-        getWindowManager().getDefaultDisplay().getMetrics(metrics);
-        float logicalDensity = metrics.density;
-        return dp * logicalDensity;
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -60,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar_album);
         setSupportActionBar(toolbar);
         // Create the adapter that will return a fragment for each of the three
-        // primary sections of the activity.
+        // primary sections of the activity
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 
         // Set up the ViewPager with the sections adapter.
@@ -105,36 +99,28 @@ public class MainActivity extends AppCompatActivity {
      * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
      * one of the sections/tabs/pages.
      */
-    public class SectionsPagerAdapter extends FragmentPagerAdapter {
-        private SongFragment[] pages;
-        private SongFragment current;
+    private static class SectionsPagerAdapter extends FragmentStatePagerAdapter {
 
-        public SongFragment getCurrentPage() { return current; }
+        private static int NO_OF_PAGES = 4;
+        private static Bundle[] arguments;
 
+        static {
+            arguments = new Bundle[NO_OF_PAGES];
+            int[] mKeys = { MediaMetadataRetriever.METADATA_KEY_ARTIST,
+                            MediaMetadataRetriever.METADATA_KEY_ALBUM ,
+                            MediaMetadataRetriever.METADATA_KEY_GENRE ,
+                            MediaMetadataRetriever.METADATA_KEY_ARTIST };
 
-        private void initialize(){
-            if(pages == null)
-                { pages = new SongFragment[getCount()]; }
-            for(int i = 0; i < pages.length; i++) {
-                pages[i] = new SongFragment();
-                final SongFragment page = pages[i];
-                pages[i].setOnClickListener(view -> current = page);
-                pages[i].setMetaDataKey(new int[]{
-                        MediaMetadataRetriever.METADATA_KEY_ARTIST,
-                        MediaMetadataRetriever.METADATA_KEY_ALBUM,
-                        MediaMetadataRetriever.METADATA_KEY_GENRE,
-                        MediaMetadataRetriever.METADATA_KEY_TITLE
-                }[i]); pages[i].setQuery(null);
-                pages[i].setViewType(SongAdapter.ViewType.GRID);
-                if(i < pages.length-1)pages[i].beRacist();
-                //pages[i].collectSongs();
-                //if(pages[i].isRacist())pages[i].discriminate();
+            for(int i = 0; i < NO_OF_PAGES; i++){
+                arguments[i] = new Bundle();
+                arguments[i].putInt("metadata_key", mKeys[i]);
+                arguments[i].putBoolean("is_grid", i < NO_OF_PAGES -1);
             }
-            pages[pages.length - 1].setViewType(SongAdapter.ViewType.LIST);
         }
 
+
         public SectionsPagerAdapter(FragmentManager fm) {
-            super(fm); initialize();
+            super(fm);
         }
 
         @Override
@@ -144,7 +130,9 @@ public class MainActivity extends AppCompatActivity {
             if(position < 0 || position > getCount())
                 return null;
 
-            return pages[position];
+            SongFragment songFragment = new SongFragment();
+            songFragment.setArguments(arguments[position]);
+            return songFragment;
         }
 
         @Override
@@ -158,53 +146,6 @@ public class MainActivity extends AppCompatActivity {
             if(position < 0 || position > getCount())
                 return null;
             return new String[]{"Artists", "Albums", "Genre", "Songs"}[position];
-        }
-
-
-
-    }
-
-    @Override
-    public boolean onContextItemSelected(MenuItem item) {
-        SongAdapter currentSongAdapter = this.mSectionsPagerAdapter
-                .getCurrentPage().getSongAdapter();
-        int position = currentSongAdapter.getPosition();
-
-        Toast.makeText(this, ""+position, Toast.LENGTH_SHORT).show();
-
-        switch (item.getItemId()) {
-            case R.id.add_to_playlist:
-            case R.id.add_to_queue:
-            case R.id.set_as_ringtone:
-            case R.id.c_add_to_playlist:
-            case R.id.c_add_to_queue:
-                Toast.makeText(this, item.getTitle()+" applied to "+
-                        currentSongAdapter.getSongList().get(position).getTitle(), Toast.LENGTH_SHORT).show();
-                return true;
-            case R.id.c_go_to_cluster:
-                Intent intent = null;
-                switch (this.mSectionsPagerAdapter.current.getMetaDataKey()){
-                    case MediaMetadataRetriever.METADATA_KEY_ARTIST:
-                        intent = new Intent(this, ArtistActivity.class);
-                        intent.putExtra("@artist_activity",
-                                "*,"+currentSongAdapter.getSongList().get(position).getArtist()+",*,*");
-                        break;
-                    case MediaMetadataRetriever.METADATA_KEY_ALBUM:
-                        intent = new Intent(this, ListingActivity.class);
-                        intent.putExtra("@album_activity",
-                                currentSongAdapter.getSongList().get(position).getAlbum()+",*,*,*");
-                        break;
-                    case MediaMetadataRetriever.METADATA_KEY_GENRE:
-                        intent = new Intent(this, ListingActivity.class);
-                        intent.putExtra("@album_activity",
-                                "*,*,"+currentSongAdapter.getSongList().get(position).getGenre()+",*");
-                        break;
-
-                } if(intent != null) startActivity(intent);
-                return true;
-
-            default:
-                return false;
         }
     }
 

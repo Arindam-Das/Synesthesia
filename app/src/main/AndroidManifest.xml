@@ -12,14 +12,13 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:configChanges="keyboardHidden|orientation|screenSize"
+
             android:name=".MainActivity"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar">
 
         </activity>
         <activity
-            android:configChanges="keyboardHidden|orientation|screenSize"
             android:name=".ArtistActivity"
             android:label="@string/title_activity_artist"
             android:parentActivityName=".MainActivity"
@@ -33,7 +32,7 @@
         <activity
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:theme="@style/AppTheme.NoActionBar"
-            android:name=".AlbumActivity"
+            android:name=".ListingActivity"
             android:parentActivityName=".ArtistActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"

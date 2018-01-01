@@ -30,14 +30,15 @@ import java.io.Serializable;
 public class Song implements Serializable{
 
     /*Static constants for field names in the ORM database */
-    public static final String ALBUM_FIELD_NAME = "album";
-    public static final String ARTIST_FIELD_NAME = "artist";
-    public static final String GENRE_FIELD_NAME = "genre";
-    public static final String TITLE_FIELD_NAME = "title";
+    private static final String ALBUM_FIELD_NAME = "album";
+    private static final String ARTIST_FIELD_NAME = "artist";
+    private static final String GENRE_FIELD_NAME = "genre";
+    private static final String TITLE_FIELD_NAME = "title";
 
+    /* Delimiter for packing together metadata as queries*/
+    public static final String QUERY_DELIMITER = ":";
 
     /*Instance variables*/
-
     @DatabaseField(id = true, unique = true, canBeNull = false)
     private String path;
 

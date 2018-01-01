@@ -1,6 +1,5 @@
 package com.appprojects.arindam.synesthesia;
 
-import android.content.Intent;
 import android.media.MediaMetadataRetriever;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
@@ -14,15 +13,14 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
-import android.view.MenuItem;
-import android.view.View;
 
-import android.widget.Toast;
-
-import com.appprojects.arindam.synesthesia.util.recyclerui.SongAdapter;
 import com.appprojects.arindam.synesthesia.util.recyclerui.SongFragment;
 
+import static com.appprojects.arindam.synesthesia.util.Song.*;
+
 public class ArtistActivity extends AppCompatActivity {
+
+    public static final String INTENT_KEY = "@artist_activity";
 
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -41,17 +39,15 @@ public class ArtistActivity extends AppCompatActivity {
 
     //query to be passed on to the songFragment to collect the
     //collect the songs from the dao on initialization in the songFragment
-    private String query,
+    private static String query,
     //title of the appbar: this is set to the album name
     title; //as requested as requested in the query
 
-    private SongFragment songFragment;
-
     private String getQuery(){
-        if(query == null){
+        if(getIntent() != null){
             query = getIntent()
-                    .getStringExtra("@artist_activity");
-            title = query.split(",")[1];
+                    .getStringExtra(INTENT_KEY);
+            title = query.split(QUERY_DELIMITER)[1];
         } return query;
     }
 
@@ -64,8 +60,8 @@ public class ArtistActivity extends AppCompatActivity {
 
 
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_album);
-        toolbar.setTitle(this.title);
+        Toolbar toolbar = findViewById(R.id.toolbar_album);
+        toolbar.setTitle(title);
         setSupportActionBar(toolbar);
 
 
@@ -94,46 +90,42 @@ public class ArtistActivity extends AppCompatActivity {
      * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
      * one of the sections/tabs/pages.
      */
-    public class SectionsPagerAdapter extends FragmentPagerAdapter {
+    public static class SectionsPagerAdapter extends FragmentPagerAdapter {
 
-        private SongFragment albums, songs, current;
+        private static int NO_OF_PAGES = 2;
+        private static Bundle[] arguments;
 
-        private void initialize(){
-            if(albums == null){
-                albums = new SongFragment();
-                albums.setViewType(SongAdapter.ViewType.GRID);
-                albums.setQuery(getQuery());
-                albums.beRacist();
-                albums.setOnClickListener(view -> current = albums);
-                albums.setMetaDataKey(MediaMetadataRetriever.METADATA_KEY_ALBUM);
-            }
-            if(songs == null){
-                songs = new SongFragment();
-                songs.setQuery(getQuery());
-                songs.setOnClickListener(view -> current = songs);
+        static {
+            arguments = new Bundle[NO_OF_PAGES];
+            int[] mKeys = {
+                    MediaMetadataRetriever.METADATA_KEY_ALBUM ,
+                    MediaMetadataRetriever.METADATA_KEY_ARTIST };
+
+            for(int i = 0; i < NO_OF_PAGES; i++){
+                arguments[i] = new Bundle();
+                arguments[i].putInt("metadata_key", mKeys[i]);
+                arguments[i].putBoolean("is_grid", i < NO_OF_PAGES-1);
             }
         }
 
         public SectionsPagerAdapter(FragmentManager fm) {
-            super(fm); initialize();
+            super(fm);
         }
-
-        public SongFragment getCurrentPage() { return current; }
 
         @Override
         public Fragment getItem(int position) {
-            //initialize();
-            switch (position){
-                case 0: return albums;
-                case 1: return songs;
-            }
-            return null;
+            if(position < 0 || position >= getCount())
+                return null;
+            SongFragment songFragment = new SongFragment();
+            arguments[position].putString("query", query);
+            songFragment.setArguments(arguments[position]);
+            return songFragment;
         }
 
         @Override
         public int getCount() {
             // Show 2 total pages.
-            return 2;
+            return NO_OF_PAGES;
         }
 
         @Override
@@ -145,42 +137,6 @@ public class ArtistActivity extends AppCompatActivity {
                     return "Songs";
             }
             return null;
-        }
-
-
-    }
-
-    @Override
-    public boolean onContextItemSelected(MenuItem item) {
-        SongAdapter currentSongAdapter = this.mSectionsPagerAdapter
-                .getCurrentPage().getSongAdapter();
-        int position = currentSongAdapter.getPosition();
-
-        Toast.makeText(this, ""+position, Toast.LENGTH_SHORT).show();
-
-        switch (item.getItemId()) {
-            case R.id.add_to_playlist:
-            case R.id.add_to_queue:
-            case R.id.set_as_ringtone:
-            case R.id.c_add_to_playlist:
-            case R.id.c_add_to_queue:
-                Toast.makeText(this, item.getTitle()+" applied to "+
-                        currentSongAdapter.getSongList().get(position).getTitle(), Toast.LENGTH_SHORT).show();
-                return true;
-            case R.id.c_go_to_cluster:
-                Intent intent = null;
-                switch (this.mSectionsPagerAdapter.current.getMetaDataKey()){
-                    case MediaMetadataRetriever.METADATA_KEY_ALBUM:
-                        intent = new Intent(this, ListingActivity.class);
-                        intent.putExtra("@album_activity",
-                                currentSongAdapter.getSongList().get(position).getAlbum()+"," +
-                                        currentSongAdapter.getSongList().get(position).getArtist()+",*,*");
-                        break;
-                } if(intent != null) startActivity(intent);
-                return true;
-
-            default:
-                return false;
         }
     }
 }

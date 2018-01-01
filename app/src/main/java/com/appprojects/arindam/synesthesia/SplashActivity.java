@@ -12,6 +12,7 @@ import android.widget.Toast;
 
 import com.appprojects.arindam.synesthesia.util.SongCollector;
 import com.appprojects.arindam.synesthesia.util.SongDatabaseHelper;
+import com.appprojects.arindam.synesthesia.util.Task;
 
 import java.security.InvalidAlgorithmParameterException;
 import java.util.Set;
@@ -37,14 +38,9 @@ public class SplashActivity extends AppCompatActivity {
                 .getStringSet(DirectorySetterActivity.SP_SEARCH_DIR_KEY, new ArraySet<String>());
 
         SongCollector songCollector = new SongCollector(getHelper());
-        songCollector.setTaskToBeDoneOnCompletion(new SongCollector.Task() {
-            @Override
-            public void doTask() {
-                SplashActivity.this
-                        .startActivity(
-                                new Intent(SplashActivity.this, MainActivity.class));
-            }
-        });
+        songCollector.setTaskToBeDoneOnCompletion(() ->
+                SplashActivity.this.startActivity(
+                        new Intent(SplashActivity.this, MainActivity.class)));
 
         for(String path : directoryPathSet){
             try { songCollector.addSearchDirectory(path);}

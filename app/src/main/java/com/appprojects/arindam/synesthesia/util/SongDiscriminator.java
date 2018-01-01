@@ -11,17 +11,15 @@ import java.util.List;
 
 public class SongDiscriminator implements Runnable {
 
-    private List<Song> songs;
-    private int metadataKey;
-    private boolean ready = false;
+    /* Instance variables of SongDiscriminator*/
+    private List<Song> songs; //songs to be discriminated
+    private int metadataKey; //parameter for discrimination
 
     public SongDiscriminator(List<Song> songs, int metadataKey){
         this.songs = songs; this.metadataKey = metadataKey;
     }
 
     public List<Song> getSongs() { return songs; }
-
-    public boolean isReady(){ return ready; }
 
     @Override
     public void run() {
@@ -32,6 +30,5 @@ public class SongDiscriminator implements Runnable {
         }
         songs = new ArrayList<>();
         songs.addAll(map.values());
-        ready = true;
     }
 }

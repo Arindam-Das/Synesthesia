@@ -21,9 +21,9 @@ import java.util.Set;
 
 public class SongCollector implements Runnable{
 
-    public interface Task{
-        void doTask();
-    }
+    public static final String[] SONG_EXTENSIONS = {".mp3", ".mp4", ".m4a", ".3gp", ".wav"};
+
+    //public interface Task{ void doTask(); }
 
     /**
      * Root of the file tree to be searched for files according to
@@ -57,14 +57,11 @@ public class SongCollector implements Runnable{
 
     private SongDatabaseHelper databaseHelper;
 
-    private FileFilter isSong = new FileFilter() {
-        @Override
-        public boolean accept(File file) {
-            String path = file.getAbsolutePath();
-            for(String extension : SongClassifier.SONG_EXTENSIONS)
-            {if(path.endsWith(extension)) return true;}
-            return false;
-        }
+    private FileFilter isSong = file -> {
+        String path = file.getAbsolutePath();
+        for(String extension : SONG_EXTENSIONS)
+        {if(path.endsWith(extension)) return true;}
+        return false;
     };
 
     /**
